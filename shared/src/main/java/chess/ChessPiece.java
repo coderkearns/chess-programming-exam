@@ -1,6 +1,10 @@
 package chess;
 
+import chess.movestrategies.*;
+
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Objects;
 
 /**
  * Represents a single chess piece
@@ -10,7 +14,12 @@ import java.util.Collection;
  */
 public class ChessPiece {
 
+    final ChessGame.TeamColor teamColor;
+    final ChessPiece.PieceType pieceType;
+
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
+        this.teamColor = pieceColor;
+        this.pieceType = type;
     }
 
     /**
@@ -29,14 +38,14 @@ public class ChessPiece {
      * @return Which team this chess piece belongs to
      */
     public ChessGame.TeamColor getTeamColor() {
-        throw new RuntimeException("Not implemented");
+        return teamColor;
     }
 
     /**
      * @return which type of chess piece this piece is
      */
     public PieceType getPieceType() {
-        throw new RuntimeException("Not implemented");
+        return pieceType;
     }
 
     /**
@@ -47,6 +56,43 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("Not implemented");
+        var moves = new HashSet<ChessMove>();
+
+        switch (pieceType) {
+            case ROOK -> new RookMoveStrategy(board, myPosition, this).addMoves(moves);
+            case BISHOP -> new BishopMoveStrategy(board, myPosition, this).addMoves(moves);
+            case QUEEN -> {
+                new RookMoveStrategy(board, myPosition, this).addMoves(moves);
+                new BishopMoveStrategy(board, myPosition, this).addMoves(moves);
+            }
+            case KING -> new KingMoveStrategy(board, myPosition, this).addMoves(moves);
+            case KNIGHT -> new KnightMoveStrategy(board, myPosition, this).addMoves(moves);
+            case PAWN -> new PawnMoveStrategy(board, myPosition, this).addMoves(moves);
+            default -> {}
+        };
+
+        return moves;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessPiece that = (ChessPiece) o;
+        return teamColor == that.teamColor && pieceType == that.pieceType;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(teamColor, pieceType);
+    }
+
+    @Override
+    public String toString() {
+        return "ChessPiece{" +
+                "teamColor=" + teamColor +
+                ", pieceType=" + pieceType +
+                '}';
     }
 }
